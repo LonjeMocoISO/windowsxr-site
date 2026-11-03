@@ -123,7 +123,15 @@ export function attachPortal(document, window) {
     renderCode();
   };
   portal = new WebConnectionPortal({ fetcher: window.fetch.bind(window), changed });
-  byId('get-code-button').addEventListener('click', () => { void portal.activate(); });
+  const localDashboard = window.isSecureContext === false
+    && ['windowsxr.com', 'www.windowsxr.com'].includes(window.location.hostname);
+  if (localDashboard) {
+    byId('portal-status').textContent = 'Open the updated Windows XR Connect on this PC. Get my code opens its local dashboard while HTTPS is being set up.';
+  }
+  byId('get-code-button').addEventListener('click', () => {
+    if (localDashboard) { window.location.assign(COMPANION_ORIGIN + '/'); return; }
+    void portal.activate();
+  });
   byId('web-connection-form').addEventListener('submit', event => { event.preventDefault(); void portal.start(network.value); });
   byId('web-renew-button').addEventListener('click', () => { void portal.pair(); });
   byId('web-disconnect-button').addEventListener('click', () => { void portal.disconnect(); });
