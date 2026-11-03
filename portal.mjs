@@ -1,8 +1,8 @@
 import { ConnectionClient } from './connection-client.mjs';
 
 const COMPANION_ORIGIN = 'http://127.0.0.1:23875';
-const UNAVAILABLE = 'Open Windows XR Connect on this PC, then return here and choose Get my code. If your browser asks, allow access to the local connection.';
-const NOT_AUTHORIZED = 'Windows XR Connect has not authorized this page. Open the connection page provided by the companion and try again.';
+const UNAVAILABLE = 'Open Windows XR Connect from the latest download after closing any earlier copy. Return here and choose Get my code. If prompted, allow local network access.';
+const NOT_AUTHORIZED = 'Windows XR Connect has not authorized this page. Close the previous companion and open the latest version downloaded here, then choose Get my code again.';
 
 export function bootstrapToken(raw) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)
@@ -99,7 +99,7 @@ export function attachPortal(document, window) {
     byId('portal-notice').hidden = !byId('portal-notice').textContent;
     byId('get-code-button').hidden = !!current && !portal?.authorizationLost;
     byId('get-code-button').disabled = busy;
-    byId('portal-status').textContent = current?.description || (busy ? 'Checking Windows XR Connect on this PC…' : 'After opening Windows XR Connect, get your code here.');
+    byId('portal-status').textContent = current?.description || (busy ? 'Checking Windows XR Connect on this PC…' : 'Close any previous companion and open the updated Windows XR Connect on this PC. Then select Get my code and allow local network access if prompted.');
     const canStart = !!current?.canStart;
     byId('web-connection-form').hidden = !canStart;
     if (current) {
