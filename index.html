@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Connect your Windows apps to Windows XR on Meta Quest over your local network.">
+  <title>Connect your PC · Windows XR</title>
+  <link rel="stylesheet" href="styles.css?v=header-logo-3">
+  <script type="module" src="portal.mjs"></script>
+</head>
+<body>
+  <header class="site-header"><a class="wordmark" href="./" aria-label="Windows XR home"><img src="windows-xr-white-logo.png" alt="" width="2172" height="724"></a><span class="eyebrow">Windows apps. Your space.</span></header>
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">Windows XR for Meta Quest</p>
+      <h1 id="page-title">Your PC,<br><span>in your space.</span></h1>
+      <p class="intro">Open your Windows apps in their own Horizon panels. Connect your Quest to your PC’s hotspot, then pair Windows XR with this PC.</p>
+      <div class="hero-download">
+        <p class="setup-closing">Enjoy Windows, right in your headset.</p>
+        <button class="button primary download" type="button" disabled>Download not yet available</button>
+        <p class="download-note">The public Windows XR Connect download is being prepared. If you already have a compatible companion, you can get your connection code below.</p>
+        <p class="download-note">Extract the ZIP, keep its files together, and open <strong>WindowsXR.Connect.exe</strong>. Your browser will not run it automatically.</p>
+      </div>
+    </section>
+    <section class="setup glass" aria-labelledby="setup-title">
+      <div class="section-heading"><h2 id="setup-title">One connection.<br>Independent windows.</h2><span class="small-tag">Local network</span></div>
+      <ol class="steps">
+        <li><span class="step-number" aria-hidden="true">01</span><div><h3>Connect your Quest to your PC’s hotspot.</h3></div></li>
+        <li><span class="step-number" aria-hidden="true">02</span><div><h3>Download Windows XR Connect.</h3></div></li>
+        <li><span class="step-number" aria-hidden="true">03</span><div><h3>Open the companion file once the download is complete.</h3></div></li>
+        <li><span class="step-number" aria-hidden="true">04</span><div><h3>Return to this page to get your code.</h3></div></li>
+        <li><span class="step-number" aria-hidden="true">05</span><div><h3>Enter the six-digit code in the Windows XR app on Quest, before the splash.</h3></div></li>
+      </ol>
+      <section id="web-connection" class="web-connection" aria-labelledby="web-connection-title">
+        <h3 id="web-connection-title">Your connection code</h3>
+        <p id="portal-status" class="portal-status" role="status" aria-live="polite">After opening Windows XR Connect, get your code here.</p>
+        <button id="get-code-button" class="button secondary" type="button">Get my code</button>
+        <form id="web-connection-form" hidden>
+          <label id="web-network-label" for="web-network">PC network</label>
+          <select id="web-network" name="address" required aria-describedby="web-network-help"></select>
+          <p id="web-network-help" class="download-note">Choose your hotspot network. Allow your paired Quest to view and control your Windows app windows.</p>
+          <button id="web-allow-button" class="button primary" type="submit">Allow connection</button>
+        </form>
+        <div id="web-pairing" hidden>
+          <output id="web-pairing-code" class="web-pairing-code" aria-label="Six-digit pairing code"></output>
+          <p id="web-pairing-countdown" class="download-note"></p>
+        </div>
+        <p id="portal-notice" class="portal-notice" role="alert" hidden></p>
+        <div class="portal-actions"><button id="web-renew-button" class="button secondary" type="button" hidden>Get a new code</button><button id="web-disconnect-button" class="button quiet" type="button" hidden>Disconnect</button></div>
+        <noscript><p class="portal-notice">Enable JavaScript to get your connection code on this page.</p></noscript>
+      </section>
+      <div class="connection-note"><span class="status-dot" aria-hidden="true"></span><p>Keep Windows XR Connect running while you use your Windows apps. Video and input travel between your paired devices over the local network.</p></div>
+    </section>
+  </main>
+  <footer><span>Windows XR Connect</span><p>Pair only a headset you trust. You can disconnect it from this page.</p></footer>
+</body>
+</html>
