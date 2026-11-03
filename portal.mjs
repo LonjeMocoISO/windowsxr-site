@@ -24,7 +24,7 @@ export class WebConnectionPortal {
   }
   async localFetch(path, options) {
     if (!/^\/api\/(status|start|pairing|disconnect)$/.test(path)) throw new Error('Unsupported companion action');
-    const response = await this.fetcher(COMPANION_ORIGIN + path, { ...options, credentials: 'omit', mode: 'cors' });
+    const response = await this.fetcher(COMPANION_ORIGIN + path, { ...options, credentials: 'omit', mode: 'cors', targetAddressSpace: 'loopback' });
     if (response.status === 401 || response.status === 403) this.authorizationLost = true;
     return response;
   }
@@ -43,7 +43,7 @@ export class WebConnectionPortal {
     try {
       timeout = this.setTimer(() => controller.abort(), 8000);
       const response = await this.fetcher(COMPANION_ORIGIN + '/api/web-bootstrap', {
-        method: 'POST', mode: 'cors', credentials: 'omit', redirect: 'error', cache: 'no-store',
+        method: 'POST', mode: 'cors', targetAddressSpace: 'loopback', credentials: 'omit', redirect: 'error', cache: 'no-store',
         headers: { 'X-XROS-Web': '1' }, signal: controller.signal
       });
       if (!this.active || generation !== this.generation) return false;
