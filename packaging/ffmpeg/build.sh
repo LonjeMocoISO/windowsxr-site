@@ -69,7 +69,7 @@ CONFIGURE=(
     --prefix="$PREFIX" --extra-cflags="-I$PREFIX/include"
     --extra-ldflags="-L$PREFIX/lib -static -static-libgcc -static-libstdc++"
     --disable-autodetect --disable-gpl --disable-nonfree --disable-version3
-    --disable-everything --disable-doc --disable-debug --enable-small
+    --disable-everything --disable-doc --disable-debug
     --disable-programs --enable-ffmpeg --disable-ffplay --disable-ffprobe
     --disable-network --disable-avdevice --disable-postproc --disable-swresample
     --enable-static --disable-shared --enable-pthreads
