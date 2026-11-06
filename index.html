@@ -6,12 +6,20 @@
   <meta name="color-scheme" content="dark">
   <meta name="description" content="Connect your Windows apps to Windows XR on Meta Quest over your local network.">
   <title>Connect your PC · Windows XR</title>
-  <link rel="stylesheet" href="styles.css?v=header-logo-3">
+  <link rel="stylesheet" href="styles.css?v=device-setup-1">
+  <script type="module" src="setup-mode.mjs?v=device-setup-1"></script>
   <script type="module" src="portal.mjs?v=preview-04"></script>
 </head>
 <body>
   <header class="site-header"><a class="wordmark" href="./" aria-label="Windows XR home"><img src="windows-xr-white-logo.png" alt="" width="2172" height="724"></a><span class="eyebrow">Windows apps. Your space.</span></header>
+  <nav class="device-switch-wrap" aria-label="Setup device">
+    <div class="device-switch" role="tablist" aria-label="Choose your setup device">
+      <button class="device-tab" id="pc-tab" type="button" role="tab" aria-selected="true" aria-controls="pc-view" tabindex="0" data-device="pc">PC</button>
+      <button class="device-tab" id="headset-tab" type="button" role="tab" aria-selected="false" aria-controls="headset-view" tabindex="-1" data-device="headset">Headset</button>
+    </div>
+  </nav>
   <main>
+    <div class="mode-view" id="pc-view" role="tabpanel" aria-labelledby="pc-tab">
     <section class="hero" aria-labelledby="page-title">
       <p class="eyebrow">Windows XR for Meta Quest</p>
       <h1 id="page-title">Your PC,<br><span>in your space.</span></h1>
@@ -52,6 +60,31 @@
       </section>
       <div class="connection-note"><span class="status-dot" aria-hidden="true"></span><p>Keep Windows XR Connect running while you use your Windows apps. Video and input travel between your paired devices over the local network.</p></div>
     </section>
+    </div>
+    <div class="mode-view" id="headset-view" role="tabpanel" aria-labelledby="headset-tab" hidden>
+      <section class="hero" aria-labelledby="headset-page-title">
+        <p class="eyebrow">Windows XR for Meta Quest</p>
+        <h1 id="headset-page-title">Your apps,<br><span>in your headset.</span></h1>
+        <p class="intro">Bring your Windows workspace into Meta Horizon. Install Windows XR on your headset, then connect it to your PC to open your apps in their own panels.</p>
+        <div class="hero-download">
+          <p class="setup-closing">Your Windows workspace starts here.</p>
+          <a class="button primary download" href="https://github.com/LonjeMocoISO/windowsxr-site/releases/download/windows-xr-quest-apk57-windowsxr/windowsxr.apk" download="windowsxr.apk">Download Windows XR APK <span aria-hidden="true">↗</span></a>
+          <p class="download-note">Meta Quest · Android APK · com.windowsxr.meta</p>
+          <p class="download-note">Install <strong>Windows XR</strong> on your headset, then follow the PC setup to connect and get your code.</p>
+        </div>
+      </section>
+      <section class="setup glass" aria-labelledby="headset-setup-title">
+        <div class="section-heading"><h2 id="headset-setup-title">Set up your headset.<br>Then connect your PC.</h2><span class="small-tag">Headset setup</span></div>
+        <ol class="steps">
+          <li><span class="step-number" aria-hidden="true">01</span><div><h3>Download the APK on your PC or headset.</h3><p>On your PC, use the download button. Or visit <a href="https://www.windowsxr.com/#headset">www.windowsxr.com</a> in your headset browser and download the APK there.</p><p class="substep"><span class="substep-label">1A</span> If you downloaded it on your PC, transfer the APK to your headset.</p></div></li>
+          <li><span class="step-number" aria-hidden="true">02</span><div><h3>Install and open Windows XR on your headset.</h3><p>Once installed, open Windows XR from your headset's Unknown Sources library.</p></div></li>
+          <li><span class="step-number" aria-hidden="true">03</span><div><h3>Continue with the PC setup.</h3><p>Install Windows XR Connect on your PC, get your six-digit code and enter it in Windows XR on your headset.</p></div></li>
+        </ol>
+        <p class="apk-install-note">Downloading or transferring the APK does not install it. If APK installation is not available on your headset, use <a href="https://developers.meta.com/vr/documentation/unity/ts-mqdh-deploy-build/" target="_blank" rel="noopener noreferrer">Meta VR Developer Hub</a> on your PC.</p>
+        <button class="button secondary continue-pc" type="button" data-go-pc>Continue to PC setup <span aria-hidden="true">→</span></button>
+        <div class="connection-note"><span class="status-dot" aria-hidden="true"></span><p>Keep your Quest and PC on the same hotspot when pairing Windows XR.</p></div>
+      </section>
+    </div>
   </main>
   <footer><span>Windows XR Connect</span><p>Pair only a headset you trust. You can disconnect it from this page.</p></footer>
 </body>
