@@ -25,6 +25,7 @@ fetch_verified "$FFMPEG_URL" "$WORK_DIR/downloads/ffmpeg-7.1.tar.xz" "$FFMPEG_SH
 fetch_verified "$VPL_URL" "$WORK_DIR/downloads/libvpl-2.13.0.tar.gz" "$VPL_SHA256"
 cp "$WORK_DIR/downloads/ffmpeg-7.1.tar.xz" "$WORK_DIR/downloads/libvpl-2.13.0.tar.gz" "$DIST_DIR/source/"
 cp "$RECIPE_DIR/build.sh" "$RECIPE_DIR/README.md" "$RECIPE_DIR/onevpl-mingw.patch" "$DIST_DIR/source/"
+cp "$RECIPE_DIR/BtbN-LICENSE.txt" "$RECIPE_DIR/BtbN-ATTRIBUTION.txt" "$DIST_DIR/licenses/"
 tar -xJf "$WORK_DIR/downloads/ffmpeg-7.1.tar.xz" -C "$WORK_DIR/src"
 tar -xzf "$WORK_DIR/downloads/libvpl-2.13.0.tar.gz" -C "$WORK_DIR/src"
 
@@ -72,7 +73,7 @@ CONFIGURE=(
     --disable-everything --disable-doc --disable-debug
     --disable-programs --enable-ffmpeg --disable-ffplay --disable-ffprobe
     --disable-network --disable-avdevice --disable-postproc --disable-swresample
-    --enable-static --disable-shared --enable-pthreads
+    --enable-static --disable-shared --disable-pthreads --enable-w32threads
     --enable-libvpl --enable-d3d11va --enable-dxva2
     --enable-avcodec --enable-avformat --enable-avfilter --enable-swscale
     --enable-demuxer=rawvideo --enable-decoder=rawvideo --enable-encoder=h264_qsv

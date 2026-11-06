@@ -1,0 +1,13 @@
+The oneVPL MinGW preprocessor guard in onevpl-mingw.patch is adapted from
+BtbN's publicly available oneVPL build recipe, under the MIT license.
+
+Copyright 2020-2021 BtbN <btbn@btbn.de>
+The complete license is provided in BtbN-LICENSE.txt.
+
+Pinned source recipe:
+https://github.com/BtbN/FFmpeg-Builds/blob/042da17aec4e8ce56c6d379c1040535d3fd3e096/scripts.d/50-onevpl.sh
+Pinned license:
+https://github.com/BtbN/FFmpeg-Builds/blob/042da17aec4e8ce56c6d379c1040535d3fd3e096/LICENSE
+
+This attribution concerns only the portability guard. The FFmpeg and Intel
+oneVPL source archives and their licenses remain separately identified.
