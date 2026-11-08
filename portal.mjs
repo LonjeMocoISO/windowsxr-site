@@ -1,4 +1,5 @@
 import { ConnectionClient } from './connection-client.mjs';
+import { PagePresenceClient, startPermittedPresence, attachDownloadPresence } from './page-presence.mjs?v=preview-09';
 
 const COMPANION_ORIGIN = 'http://127.0.0.1:23875';
 const UNAVAILABLE = 'Open Windows XR Connect from the latest download after closing any earlier copy. Return here and choose Get my code. If prompted, allow local network access.';
@@ -20,7 +21,7 @@ export class WebConnectionPortal {
     if (typeof fetcher !== 'function' || typeof changed !== 'function') throw new Error('Web connection unavailable');
     this.fetcher = fetcher; this.changed = changed; this.clock = clock;
     this.setTimer = setTimer; this.clearTimer = clearTimer;
-    this.client = null; this.bootstrapping = false; this.bootstrap = null; this.generation = 0; this.active = true; this.authorizationLost = false;
+    this.client = null; this.bootstrapping = false; this.bootstrap = null; this.generation = 0; this.active = true; this.authorizationLost = false; this.instance = null;
   }
   async localFetch(path, options) {
     if (!/^\/api\/(status|start|pairing|disconnect)$/.test(path)) throw new Error('Unsupported companion action');
@@ -51,10 +52,12 @@ export class WebConnectionPortal {
         this.changed({ status: null, busy: false, error: response.status === 403 ? NOT_AUTHORIZED : UNAVAILABLE });
         return false;
       }
-      const token = bootstrapToken(await response.json());
+      const raw = await response.json();
+      const token = bootstrapToken(raw);
       if (!this.active || generation !== this.generation) return false;
       this.client = new ConnectionClient({ token, fetcher: this.localFetch.bind(this), changed: this.changed,
         clock: this.clock, setTimer: this.setTimer, clearTimer: this.clearTimer });
+      this.instance = typeof raw.instance === 'string' && /^[a-f0-9]{32}$/.test(raw.instance) ? raw.instance : null;
       authorized = true;
     } catch {
       if (this.active && generation === this.generation) this.changed({ status: null, busy: false, error: UNAVAILABLE });
@@ -74,7 +77,14 @@ export class WebConnectionPortal {
     this.client?.pause();
   }
   resume() { this.active = true; return this.client ? this.client.resume() : Promise.resolve(false); }
-  close() { this.pause(); if (this.client) this.client.token = ''; this.client = null; }
+  resetAuthorization(message = null) {
+    // A native activation refreshes this UI, never the live XR/backend session.
+    const active = this.active; this.pause(); this.active = active;
+    if (this.client) this.client.token = '';
+    this.client = null; this.instance = null; this.authorizationLost = false;
+    this.changed({ status: null, busy: false, error: message, reset: true });
+  }
+  close() { this.pause(); if (this.client) this.client.token = ''; this.client = null; this.instance = null; }
 }
 
 export function attachPortal(document, window) {
@@ -92,6 +102,7 @@ export function attachPortal(document, window) {
     if (current?.code && !visible && current.state === 'ready') byId('portal-status').textContent = 'The code expired. Get a new code to connect.';
   }
   const changed = update => {
+    if (update.reset) { error = null; optionsKey = null; }
     if (update.error) error = update.error;
     else if (!update.settled && update.status && update.status !== current) error = null;
     current = update.status; busy = update.busy;
@@ -123,6 +134,19 @@ export function attachPortal(document, window) {
     renderCode();
   };
   portal = new WebConnectionPortal({ fetcher: window.fetch.bind(window), changed });
+  let presence = null; let permission = null;
+  if (window.crypto?.getRandomValues) {
+    const pageId = Array.from(window.crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join('');
+    presence = new PagePresenceClient({ pageId,
+      fetcher: (path, options) => window.fetch(COMPANION_ORIGIN + path, { ...options, mode: 'cors', targetAddressSpace: 'loopback' }),
+      changed: ({ restarted }) => {
+        // A current explicit first bootstrap has no stale credential to clear.
+        // A real instance change still fences any old in-flight bootstrap.
+        if (restarted || !portal.bootstrapping || portal.client) portal.resetAuthorization();
+      }, unavailable: () => portal.resetAuthorization(UNAVAILABLE) });
+    permission = startPermittedPresence(presence, window.navigator);
+  }
+  const downloadPresence = attachDownloadPresence(document, presence);
   const localDashboard = window.isSecureContext === false
     && ['windowsxr.com', 'www.windowsxr.com'].includes(window.location.hostname);
   if (localDashboard) {
@@ -130,7 +154,12 @@ export function attachPortal(document, window) {
   }
   byId('get-code-button').addEventListener('click', () => {
     if (localDashboard) { window.location.assign(COMPANION_ORIGIN + '/'); return; }
-    void portal.activate();
+    void (async () => {
+      await portal.activate();
+      // This button is the explicit local-network permission interaction.
+      if (presence && portal.instance) presence.instance = portal.instance;
+      presence?.start();
+    })();
   });
   byId('web-connection-form').addEventListener('submit', event => { event.preventDefault(); void portal.start(network.value); });
   byId('web-renew-button').addEventListener('click', () => { void portal.pair(); });
@@ -139,7 +168,7 @@ export function attachPortal(document, window) {
   function startTimers() { stopTimers(); poll = window.setInterval(() => { if (!document.hidden) void portal.refresh(); }, 2000); tick = window.setInterval(renderCode, 1000); }
   const visibility = () => { if (document.hidden) { stopTimers(); portal.pause(); } else { startTimers(); void portal.resume(); } };
   document.addEventListener('visibilitychange', visibility);
-  const close = () => { stopTimers(); portal.close(); document.removeEventListener('visibilitychange', visibility); };
+  const close = () => { stopTimers(); downloadPresence.close(); permission?.close(); presence?.close(); portal.close(); document.removeEventListener('visibilitychange', visibility); };
   window.addEventListener('pagehide', close, { once: true });
   if (!document.hidden) startTimers();
   return { close };
