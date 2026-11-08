@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <meta name="description" content="How Windows XR handles connection information, Windows app content and local diagnostics.">
+  <meta name="description" content="How Windows XR handles connection information, Windows app content, local diagnostics and website analytics.">
   <title>Privacy Policy · Windows XR</title>
+  <script type="module" src="analytics.mjs?v=analytics-1"></script>
   <style>
     :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#eceef0;background:#17191b;font-synthesis:none;line-height:1.7}
     *{box-sizing:border-box}body{margin:0}main{max-width:860px;margin:auto;padding:56px 26px 80px}
@@ -13,6 +14,7 @@
     h1{font-size:clamp(36px,6vw,52px);line-height:1.12;letter-spacing:-.04em;margin:30px 0 12px}h2{font-size:23px;line-height:1.3;letter-spacing:-.02em;margin:38px 0 12px}
     p,ul{margin:12px 0}li{margin:10px 0}a{color:inherit;text-underline-offset:3px}.date{color:#b7bec4;font-size:15px}.lead{font-size:19px;color:#d8dde1}.contact{padding:20px 22px;border:1px solid #454b50;border-radius:16px;margin-top:34px}
     footer{border-top:1px solid #454b50;margin-top:40px;padding-top:20px;color:#b7bec4;font-size:14px}
+    .analytics-choice{padding:18px 20px;border:1px solid #454b50;border-radius:14px;margin:20px 0}.analytics-choice button{font:inherit;font-weight:600;color:#17191b;background:#f0f2f1;border:0;border-radius:10px;padding:10px 16px;cursor:pointer}.analytics-choice button:disabled{cursor:default;opacity:.65}.analytics-choice button:focus-visible{outline:3px solid #9bbcff;outline-offset:4px}
     @media(prefers-color-scheme:light){:root{color:#202529;background:#f7f8f9}.lead,.draft{color:#3a434a}.date,footer{color:#53616b}.draft,.contact,footer{border-color:#b8c1c8}}
   </style>
 </head>
@@ -20,7 +22,7 @@
 <main>
   <a class="brand" href="https://windowsxr.com/">Windows XR</a>
   <h1>Privacy Policy</h1>
-  <p class="date">Last updated: November 7, 2026</p>
+  <p class="date">Last updated: November 8, 2026</p>
   <p class="lead">Windows XR brings selected Windows applications into panels on Meta Quest. This policy explains the information used by the Quest app, Windows XR Connect on your PC, and the connection website at windowsxr.com.</p>
   <p>Privacy and support contact: <a href="mailto:andersiniedo@gmail.com">andersiniedo@gmail.com</a>.</p>
 
@@ -43,7 +45,18 @@
   <p>The current client and companion do not automatically submit their local diagnostic files to a Windows XR support server. You can choose whether to share relevant information when asking for help.</p>
   <p>The public website and downloadable releases use GitHub and GitHub Pages. Visiting the site or downloading a file sends a normal internet request to the relevant provider. Hosting, download, browser and network infrastructure providers may process technical request information, such as IP addresses, request times and browser or device details, under their own policies.</p>
   <p>Meta provides the Quest operating system and may provide app distribution, system input and other platform services. Your use of those services is also governed by Meta's policies. Windows, your browser, email services and the Windows applications you use have their own data practices. This policy does not replace their policies or describe all information those providers may handle.</p>
-  <p>The current Windows XR Android client and connection page do not include an advertising or third-party analytics SDK. This does not mean the surrounding platform, hosting or download services keep no logs.</p>
+  <p>The current Windows XR Android client does not include an advertising or third-party analytics SDK. The public connection website uses Umami Cloud for the limited website analytics described below. This website measurement is separate from the Quest app, Windows companion and Windows application content.</p>
+
+  <h2 id="website-analytics">Website analytics</h2>
+  <p>We use <a href="https://umami.is/" target="_blank" rel="noopener noreferrer">Umami Cloud</a> to understand visits to windowsxr.com, approximate visitor counts and countries, and how often visitors activate the APK and Windows XR Connect download buttons. A button activation does not confirm that a file finished downloading or was installed. GitHub provides separate download counters for the hosted files.</p>
+  <p>Our website sends a fixed page path and title, browser language, screen dimensions and, for a download button, the event name <code>download_apk</code> or <code>download_connect</code>. It does not send form contents, pairing codes, PC network addresses, session credentials, window content, URL query strings, URL fragments or referring-page URLs to Umami. We use our own limited collection code; we do not load a third-party analytics script into the connection page or enable session replay.</p>
+  <p>Like other internet requests, an analytics request exposes your public IP address and browser user-agent to the receiving service. Umami processes request information to derive approximate location and visitor/browser statistics under its <a href="https://umami.is/privacy" target="_blank" rel="noopener noreferrer">privacy policy</a>. Countries can be affected by VPNs and network routing, and visitor counts are estimates rather than verified people.</p>
+  <p>This measurement does not use analytics cookies or save an analytics identifier in your browser. The analytics project uses Umami's US data region. Our current Umami Hobby plan retains reporting data for six months. Umami and its infrastructure providers may retain operational information under their own policies.</p>
+  <p>You can turn website analytics off for this browser below. The website stores only that preference in local storage. We also skip measurement when the browser sends Do Not Track or Global Privacy Control. Blocking analytics or turning it off does not prevent downloads, pairing or use of Windows XR.</p>
+  <div class="analytics-choice">
+    <p id="analytics-status" role="status" aria-live="polite">Website analytics respects your browser privacy choices. This control requires JavaScript.</p>
+    <button id="analytics-toggle" type="button" disabled>Website analytics settings</button>
+  </div>
 
   <h2>Local storage and retention</h2>
   <p>The Quest app uses app-private storage for connection information and local diagnostics. Windows XR Connect stores its own runtime data and diagnostics in your Windows user profile. Private storage is not a promise that every file is encrypted at rest.</p>
@@ -73,7 +86,7 @@
     <h2 id="contact-heading" style="margin-top:0">Contact Windows XR</h2>
     <p>For privacy questions, support or help with local data, email <a href="mailto:andersiniedo@gmail.com">andersiniedo@gmail.com</a>.</p>
   </section>
-  <footer>Windows XR · Privacy Policy · November 7, 2026</footer>
+  <footer>Windows XR · Privacy Policy · November 8, 2026</footer>
 </main>
 </body>
 </html>
