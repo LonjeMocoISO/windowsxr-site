@@ -6,7 +6,7 @@ The Windows XR Host and Quest APK are not part of this source artifact.
 
 ## Sources
 
-- FFmpeg 7.1 official source archive, unmodified:
+- FFmpeg 7.1 official source archive:
   https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz
   SHA-256 `40973d44970dbc83ef302b0609f2e74982be2d85916dd2ee7472d30678a7abe6`.
 - Intel oneVPL dispatcher 2.13.0, commit
@@ -24,9 +24,14 @@ The Windows XR Host and Quest APK are not part of this source artifact.
   SHA-256 `2fefaa227d2a3b4170797796425a59d1dd2ed5fd231db9b4244468ba327acd0b`.
 
 FFmpeg is configured with GPL, nonfree and version3 components disabled and
-uses LGPL 2.1 or later. Intel oneVPL is MIT licensed. The only source change
-is `onevpl-mingw.patch`, which limits an MSVC-version check to MSVC. Its
-equivalent is used by the public BtbN FFmpeg build recipe for oneVPL.
+uses LGPL 2.1 or later. Intel oneVPL is MIT licensed. The patch
+`onevpl-mingw.patch` limits the dispatcher's Microsoft compiler version check
+to MSVC. Its equivalent is used by BtbN's public FFmpeg build recipe.
+The LGPL `ffmpeg-7.1-mf-h264-low-delay.patch` maps the existing FFmpeg
+`-flags +low_delay` option to the Media Foundation H.264 software encoder's
+low-latency property before setting the output type. The hardware encoders
+retain their existing options.
+[Microsoft's codec property reference](https://learn.microsoft.com/en-us/windows/win32/medfound/codecapi-avlowlatencymode).
 
 ## Rebuild
 
@@ -40,12 +45,13 @@ sudo apt-get install --no-install-recommends \
 bash packaging/ffmpeg/build.sh
 ```
 
-The script verifies the pinned archives, applies the oneVPL portability
-patch, builds the static oneVPL dispatcher and includes the AMF and NVIDIA
+The script verifies the pinned archives and FFmpeg patch, applies both
+patches, builds the static oneVPL dispatcher and includes the AMF and NVIDIA
 headers. FFmpeg uses BGRA rawvideo through a pipe and NV12 conversion to
 produce H.264 Annex B. Encoders are Intel QSV with a D3D11 child device, AMD
-AMF, NVIDIA NVENC, and Windows Media Foundation. The H.264 metadata bitstream
-filter supplies access unit delimiters for the software route. The binary
+AMF, NVIDIA NVENC, and Windows Media Foundation. The host preserves the
+Media Foundation encoder's native access unit delimiters. The H.264
+metadata bitstream filter is available in the build. The binary
 must import only Windows system DLLs, with no additional FFmpeg, oneVPL,
 MinGW or libgcc DLL. At runtime vendor encoders use the user's graphics
 drivers. The NVIDIA headers require driver 531.61 or newer on Windows.

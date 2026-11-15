@@ -1,0 +1,25 @@
+Enable Windows Media Foundation H.264 software low latency when requested.
+
+This patch is licensed under LGPL-2.1-or-later, the same license as FFmpeg 7.1.
+Use the Windows encoder's VT_BOOL property with VARIANT_TRUE before setting its
+output type. Other encoder code and the default flag-off behavior are unchanged.
+https://learn.microsoft.com/en-us/windows/win32/medfound/codecapi-avlowlatencymode
+
+--- a/libavcodec/mfenc.c
++++ b/libavcodec/mfenc.c
+@@ -724,6 +724,15 @@
+ 
+         if (c->opt_enc_scenario >= 0)
+             ICodecAPI_SetValue(c->codec_api, &ff_CODECAPI_AVScenarioInfo, FF_VAL_VT_UI4(c->opt_enc_scenario));
++
++        if (avctx->codec_id == AV_CODEC_ID_H264 && !c->opt_enc_hw &&
++            (avctx->flags & AV_CODEC_FLAG_LOW_DELAY)) {
++            HRESULT hr = ICodecAPI_SetValue(c->codec_api, &ff_CODECAPI_AVLowLatencyMode,
++                                           FF_VAL_VT_BOOL(VARIANT_TRUE));
++            if (FAILED(hr))
++                av_log(avctx, AV_LOG_WARNING, "Could not enable Media Foundation low-latency mode: %s\n",
++                       ff_hr_str(hr));
++        }
+     }
+ 
+     return 0;

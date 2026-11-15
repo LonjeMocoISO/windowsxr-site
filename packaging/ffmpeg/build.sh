@@ -28,9 +28,11 @@ fetch_verified "$FFMPEG_URL" "$WORK_DIR/downloads/ffmpeg-7.1.tar.xz" "$FFMPEG_SH
 fetch_verified "$VPL_URL" "$WORK_DIR/downloads/libvpl-2.13.0.tar.gz" "$VPL_SHA256"
 fetch_verified "$NV_HEADERS_URL" "$WORK_DIR/downloads/nv-codec-headers-12.1.14.0.tar.gz" "$NV_HEADERS_SHA256"
 AMF_HEADERS="$RECIPE_DIR/amf-1.4.35-headers.tar.gz"
-printf '%s  %s\n' "$AMF_SHA256" "$AMF_HEADERS" | sha256sum --check --strict
+MF_PATCH="$RECIPE_DIR/ffmpeg-7.1-mf-h264-low-delay.patch"
+printf '%s  %s\n' "$AMF_SHA256" "$AMF_HEADERS" \
+    'bbf94e7283bed73135c6ca3e85d6ae34aae4a07fe74702d85a81b79cfc967244' "$MF_PATCH" | sha256sum --check --strict
 cp "$WORK_DIR/downloads/"{ffmpeg-7.1.tar.xz,libvpl-2.13.0.tar.gz,nv-codec-headers-12.1.14.0.tar.gz} \
-    "$AMF_HEADERS" "$DIST_DIR/source/"
+    "$AMF_HEADERS" "$MF_PATCH" "$DIST_DIR/source/"
 cp "$RECIPE_DIR/build.sh" "$RECIPE_DIR/README.md" "$RECIPE_DIR/onevpl-mingw.patch" "$DIST_DIR/source/"
 ATTRIBUTION_DIR="$RECIPE_DIR"
 if [[ ! -f "$ATTRIBUTION_DIR/BtbN-LICENSE.txt" ]]; then ATTRIBUTION_DIR="$RECIPE_DIR/../licenses"; fi
@@ -44,6 +46,7 @@ NV_HEADERS="$WORK_DIR/src/nv-codec-headers-n12.1.14.0"
 
 VPL_SOURCE="$WORK_DIR/src/libvpl-5f6bd8a1e753c8f63a3fd8b36894d6968b808a6d"
 patch --directory="$VPL_SOURCE" --strip=1 < "$RECIPE_DIR/onevpl-mingw.patch"
+patch --directory="$WORK_DIR/src/ffmpeg-7.1" --strip=1 < "$MF_PATCH"
 
 cat > "$WORK_DIR/mingw-toolchain.cmake" <<'TOOLCHAIN'
 set(CMAKE_SYSTEM_NAME Windows)
@@ -157,8 +160,9 @@ the Media Foundation software encoder.
 
 This executable is a separate program called by Windows XR through standard
 input/output. Complete FFmpeg and oneVPL sources, the upstream header
-archives, the build recipe, and the oneVPL portability patch are in source/.
-No source patch was applied to FFmpeg. Build configuration and runtime DLL imports are in build-info/.
+archives, the build recipe and both source patches are in source/. The FFmpeg
+patch maps its existing low-delay flag to the Windows H.264 software encoder.
+Build configuration and runtime DLL imports are in build-info/.
 You may replace this separately-executed ffmpeg.exe with a compatible build.
 No warranty is provided for these third-party components.
 NOTICE
