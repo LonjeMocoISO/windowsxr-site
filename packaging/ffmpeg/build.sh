@@ -15,6 +15,9 @@ FFMPEG_URL='https://ffmpeg.org/releases/ffmpeg-7.1.tar.xz'
 FFMPEG_SHA256='40973d44970dbc83ef302b0609f2e74982be2d85916dd2ee7472d30678a7abe6'
 VPL_URL='https://codeload.github.com/intel/libvpl/tar.gz/5f6bd8a1e753c8f63a3fd8b36894d6968b808a6d'
 VPL_SHA256='ad4c5b0e46035568fa43371e99a6267cd00b1e8c58c78d606b9687930f7ca4b9'
+AMF_SHA256='21b07737afe5ed2befe25eb6d3bafabef57f30e165ea9491f04a266a6605e138'
+NV_HEADERS_URL='https://codeload.github.com/FFmpeg/nv-codec-headers/tar.gz/refs/tags/n12.1.14.0'
+NV_HEADERS_SHA256='2fefaa227d2a3b4170797796425a59d1dd2ed5fd231db9b4244468ba327acd0b'
 
 fetch_verified() {
     local url="$1" target="$2" expected="$3"
@@ -23,11 +26,21 @@ fetch_verified() {
 }
 fetch_verified "$FFMPEG_URL" "$WORK_DIR/downloads/ffmpeg-7.1.tar.xz" "$FFMPEG_SHA256"
 fetch_verified "$VPL_URL" "$WORK_DIR/downloads/libvpl-2.13.0.tar.gz" "$VPL_SHA256"
-cp "$WORK_DIR/downloads/ffmpeg-7.1.tar.xz" "$WORK_DIR/downloads/libvpl-2.13.0.tar.gz" "$DIST_DIR/source/"
+fetch_verified "$NV_HEADERS_URL" "$WORK_DIR/downloads/nv-codec-headers-12.1.14.0.tar.gz" "$NV_HEADERS_SHA256"
+AMF_HEADERS="$RECIPE_DIR/amf-1.4.35-headers.tar.gz"
+printf '%s  %s\n' "$AMF_SHA256" "$AMF_HEADERS" | sha256sum --check --strict
+cp "$WORK_DIR/downloads/"{ffmpeg-7.1.tar.xz,libvpl-2.13.0.tar.gz,nv-codec-headers-12.1.14.0.tar.gz} \
+    "$AMF_HEADERS" "$DIST_DIR/source/"
 cp "$RECIPE_DIR/build.sh" "$RECIPE_DIR/README.md" "$RECIPE_DIR/onevpl-mingw.patch" "$DIST_DIR/source/"
-cp "$RECIPE_DIR/BtbN-LICENSE.txt" "$RECIPE_DIR/BtbN-ATTRIBUTION.txt" "$DIST_DIR/licenses/"
+ATTRIBUTION_DIR="$RECIPE_DIR"
+if [[ ! -f "$ATTRIBUTION_DIR/BtbN-LICENSE.txt" ]]; then ATTRIBUTION_DIR="$RECIPE_DIR/../licenses"; fi
+cp "$ATTRIBUTION_DIR/BtbN-LICENSE.txt" "$ATTRIBUTION_DIR/BtbN-ATTRIBUTION.txt" "$DIST_DIR/licenses/"
 tar -xJf "$WORK_DIR/downloads/ffmpeg-7.1.tar.xz" -C "$WORK_DIR/src"
 tar -xzf "$WORK_DIR/downloads/libvpl-2.13.0.tar.gz" -C "$WORK_DIR/src"
+tar -xzf "$WORK_DIR/downloads/nv-codec-headers-12.1.14.0.tar.gz" -C "$WORK_DIR/src"
+mkdir -p "$WORK_DIR/src/amf"
+tar -xzf "$AMF_HEADERS" -C "$WORK_DIR/src/amf"
+NV_HEADERS="$WORK_DIR/src/nv-codec-headers-n12.1.14.0"
 
 VPL_SOURCE="$WORK_DIR/src/libvpl-5f6bd8a1e753c8f63a3fd8b36894d6968b808a6d"
 patch --directory="$VPL_SOURCE" --strip=1 < "$RECIPE_DIR/onevpl-mingw.patch"
@@ -57,9 +70,12 @@ cmake -S "$VPL_SOURCE" -B "$WORK_DIR/vpl-build" -G Ninja \
 cmake --build "$WORK_DIR/vpl-build" --parallel "$(nproc)"
 cmake --install "$WORK_DIR/vpl-build"
 
+mkdir -p "$PREFIX/include/AMF"
+cp -R "$WORK_DIR/src/amf/amf/public/include/." "$PREFIX/include/AMF/"
+make -C "$NV_HEADERS" PREFIX="$PREFIX" LIBDIR=lib install
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 export PKG_CONFIG_LIBDIR="$PREFIX/lib/pkgconfig"
-pkg-config --modversion vpl
+pkg-config --modversion vpl ffnvcodec
 pkg-config --static --cflags --libs vpl
 
 cd "$WORK_DIR/src/ffmpeg-7.1"
@@ -75,9 +91,12 @@ CONFIGURE=(
     --disable-network --disable-avdevice --disable-postproc --disable-swresample
     --enable-static --disable-shared --disable-pthreads --enable-w32threads
     --enable-libvpl --enable-d3d11va --enable-dxva2
+    --enable-amf --enable-ffnvcodec --enable-nvenc --enable-mediafoundation
     --enable-avcodec --enable-avformat --enable-avfilter --enable-swscale
-    --enable-demuxer=rawvideo --enable-decoder=rawvideo --enable-encoder=h264_qsv
+    --enable-demuxer=rawvideo --enable-decoder=rawvideo
+    --enable-encoder=h264_qsv,h264_amf,h264_nvenc,h264_mf
     --enable-muxer=h264 --enable-protocol=pipe --enable-parser=h264
+    --enable-bsf=h264_metadata,h264_mp4toannexb
     --enable-filter=buffer,buffersink,format,scale,null
 )
 printf '%q ' ./configure "${CONFIGURE[@]}" > "$DIST_DIR/build-info/configure-command.txt"
@@ -90,6 +109,14 @@ cp COPYING.LGPLv2.1 "$DIST_DIR/licenses/FFmpeg-LGPL-2.1.txt"
 cp LICENSE.md "$DIST_DIR/licenses/FFmpeg-LICENSE.md"
 cp "$VPL_SOURCE/LICENSE" "$DIST_DIR/licenses/oneVPL-MIT.txt"
 cp "$VPL_SOURCE/third-party-programs.txt" "$DIST_DIR/licenses/oneVPL-third-party-programs.txt"
+cp "$WORK_DIR/src/amf/LICENSE.txt" "$DIST_DIR/licenses/AMD-AMF-MIT.txt"
+{
+    for header in "$NV_HEADERS/include/ffnvcodec/"*.h; do
+        printf '\n%s\n' "$(basename "$header")"
+        awk '{print} /\*\// {exit}' "$header"
+    done
+} > "$DIST_DIR/licenses/NVIDIA-codec-headers-MIT.txt"
+cp "$NV_HEADERS/README" "$DIST_DIR/licenses/NVIDIA-codec-headers-README.txt"
 
 # Runtime exception/permissive notices for the unmodified MinGW/GCC toolchain.
 for notice in /usr/share/doc/gcc-mingw-w64-base/copyright /usr/share/doc/mingw-w64-common/copyright /usr/share/doc/libgcc-*-dev/copyright; do
@@ -107,7 +134,10 @@ if grep -Eiq 'libgcc|libstdc\+\+|libwinpthread|libvpl|avcodec|avformat|avutil|av
 fi
 grep -q '^#define CONFIG_GPL 0$' config.h
 grep -q '^#define CONFIG_NONFREE 0$' config.h
-grep -q '^#define CONFIG_H264_QSV_ENCODER 1$' config_components.h
+grep -q '^#define CONFIG_VERSION3 0$' config.h
+for component in H264_QSV_ENCODER H264_AMF_ENCODER H264_NVENC_ENCODER H264_MF_ENCODER H264_METADATA_BSF; do
+    grep -q "^#define CONFIG_${component} 1$" config_components.h
+done
 grep -q '^#define CONFIG_D3D11VA 1$' config.h
 grep -q '^#define CONFIG_LIBVPL 1$' config.h
 
@@ -120,11 +150,15 @@ under GNU LGPL version 2.1 or later. See licenses/FFmpeg-LGPL-2.1.txt.
 
 Intel oneVPL dispatcher 2.13.0, Copyright (c) Intel Corporation, MIT license.
 See licenses/oneVPL-MIT.txt and oneVPL-third-party-programs.txt.
+AMD AMF SDK 1.4.35 headers and FFmpeg nv-codec-headers 12.1.14.0 are MIT
+licensed. See the respective upstream notices under licenses/. Their
+graphics runtimes are supplied by the installed drivers. Windows supplies
+the Media Foundation software encoder.
 
 This executable is a separate program called by Windows XR through standard
-input/output. The complete FFmpeg and oneVPL source archives, exact build
-recipe, and sole oneVPL portability patch are in source/. No source patch was
-applied to FFmpeg. Build configuration and runtime DLL imports are in build-info/.
+input/output. Complete FFmpeg and oneVPL sources, the upstream header
+archives, the build recipe, and the oneVPL portability patch are in source/.
+No source patch was applied to FFmpeg. Build configuration and runtime DLL imports are in build-info/.
 You may replace this separately-executed ffmpeg.exe with a compatible build.
 No warranty is provided for these third-party components.
 NOTICE
